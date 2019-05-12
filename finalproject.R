@@ -166,3 +166,51 @@ vars
 # getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
 # rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
 # summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
+
+
+####bar plot
+income = clean$Income
+hispanic = which(clean$Hispanic>75);  length(mostlyhispanic)
+white = which(clean$White>75); length(mostlywhite)
+black = which(clean$Black>75);  length(mostlyblack)
+native = which(clean$Native>75); length(mostlynative)
+asian = which(clean$Asian>75); length(mostlyasian)
+pacific = which(clean$Pacific>75); length(mostlypacific)
+
+#income
+mostlywhite = clean$Income[white]
+mostlyblack = clean$Income[black]
+mostlyhispanic = clean$Income[hispanic]
+mostlyasian = clean$Income[asian]
+mostlynative = clean$Income[native]
+mostlypacific = clean$Income[pacific]
+
+whiteincome = mean(mostlywhite)
+blackincome = mean(mostlyblack)
+hispanicincome = mean(mostlyhispanic)
+asianincome = mean(mostlyasian)
+nativeincome = mean(mostlynative)
+pacificincome = mean(mostlypacific)
+
+whiteincome; blackincome;hispanicincome;asianincome;nativeincome;pacificincome
+barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income")
+
+#Poverty
+mostlywhite = clean$Poverty[white]
+mostlyblack = clean$Poverty[black]
+mostlyhispanic = clean$Poverty[hispanic]
+mostlyasian = clean$Poverty[asian]
+mostlynative = clean$Poverty[native]
+mostlypacific = clean$Poverty[pacific]
+
+whitepoverty = mean(mostlywhite)
+blackpoverty = mean(mostlyblack)
+hispanicpoverty = mean(mostlyhispanic)
+asianpoverty = mean(mostlyasian)
+nativepoverty = mean(mostlynative)
+pacificpoverty = mean(mostlypacific)
+
+whitepoverty; blackpoverty;hispanicpoverty;asianpoverty;nativepoverty;pacificpoverty
+barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty")
+
+
