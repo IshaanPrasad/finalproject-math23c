@@ -43,6 +43,52 @@ var <- var(clean$Income)
 sigma <- sd(clean$Income)     #estimates square root of the population variance
 curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
 
+################## Ishaan ################## 
+
+#Visualizng the percentage of a race in a population w.r.t. the average income of the population
+income <-  clean$Income
+# Scatterplots
+# Hispanic
+percentH <- clean$Hispanic / 100
+plot(percentH, income, pch=".")
+# White
+percentW <- clean$White / 100
+plot(percentW, income, pch=".")
+# Black
+percentB <- clean$Black / 100
+plot(percentB, income, pch=".", add = TRUE)
+# Native
+percentN <- clean$Native / 100
+plot(percentN, income, pch=".")
+# Asian
+percentA <- clean$Asian / 100
+plot(percentA, income, pch=".")
+# Pacific
+percentP <- clean$Pacific / 100
+plot(percentP, income, pch=".")
+
+# Linear regression on the above scatter plots
+Percent <- c(0,1)
+Income <- c(0, 200000)
+plot(Percent, Income, pch=".") # To clear plot space but keep axes in tact
+abline(lm(income ~ percentH), col = "red") # Hispanic
+abline(lm(income ~ percentW), col = "orange") # White
+abline(lm(income ~ percentB), col = "yellow") # Black
+abline(lm(income ~ percentN), col = "green") # Native
+abline(lm(income ~ percentA), col = "blue") # Asian
+abline(lm(income ~ percentP), col = "violet") # Pacific
+
+# ggplotting the data (not finished)
+df <- data.frame(
+  percentA <- clean$Asian / 100,
+  income <-  clean$Income
+)
+ggplot(df, aes(percentA, income)) + 
+  geom_point(color = "red", size = 0.5)
+
+################## End Ishaan ################## 
+
+
 #Trying to do Permutation Test here 
 sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
 #Not an equal amount so we will randomly sample 1172 counties from MA
