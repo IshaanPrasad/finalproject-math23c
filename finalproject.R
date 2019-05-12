@@ -22,5 +22,3 @@ curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
 men <- sum(clean$Men); men
 pop <- sum(clean$TotalPop); pop
 
-?df
-
