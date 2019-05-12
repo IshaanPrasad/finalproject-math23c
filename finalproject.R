@@ -18,6 +18,9 @@ sigma <- sd(clean$Income)     #estimates square root of the population variance
 curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
 
 
+# Percentage of Men Scatterplot
+men <- sum(clean$Men); men
+pop <- sum(clean$TotalPop); pop
 
+?df
 
-curve(dbeta(x, 2,5), from = 0, to = 250000, add = TRUE, col = "blue")
