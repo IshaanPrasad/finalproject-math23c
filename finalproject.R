@@ -1,9 +1,9 @@
 rm(list=ls())
 set.seed(123)
 
+
 #Change this to location of your data
-#Can use drop down menu in R studio: file->import data set-> from stata and find stata data set
-setwd("/Users/abhishekmalani/Desktop/Math 23C/Data")
+setwd("/Users/abhishekmalani/Desktop/Math 23C/finalproject-math23c")
 
 if (!require(foreign)) install.packages("foreign"); library(foreign)
 if (!require(haven)) install.packages("haven"); library(haven)
@@ -26,23 +26,69 @@ index <- which(!is.na(census$Income) & !is.na(census$CensusTract) & !is.na(censu
 clean <- census[index,]
 head(clean)
 write.csv(clean,"clean.csv")  #look at this in Excel or as a text file
+
+#Median income across all census tracts
 median(clean$Income)
-length(clean$Income)
+
+#Histogram with Normal Distribution added
 hist(clean$Income)
-h = hist(clean$Income, probability = TRUE) # or hist(x,plot=FALSE) to avoid the plot of the histogram
+h = hist(clean$Income)
 h$density = h$counts/sum(h$counts)
 plot(h,freq=FALSE)
+hist(clean$Income, breaks = "FD", probability = TRUE)
 
 #To find the best fitting normal distribution, compute the mean and variance of the data
 mu <- mean(clean$Income); mu
+var <- var(clean$Income)
 sigma <- sd(clean$Income)     #estimates square root of the population variance
 curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
+
+#Trying to do Permutation Test here 
+sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
+#Not an equal amount so we will randomly sample 1172 counties from MA
+
+MaSample <- sample (clean$State == "Massachusetts", size=1172, replace =F)
+length(MaSample)
+
+#Calculate the observed beer consumption difference by gender
+MassAvg <- sum(clean$Income*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MassAvg
+AlabAvg <- sum(clean$Income*(clean$State == "Alabama"))/sum(clean$State == "Alabama");AlabAvg
+observed <- MassAvg - AlabAvg; observed     #the men drank more beer
+
+#Now replace Male with a random sample of 15 customers
+State <- sample(clean$State); State   #permuted gender column
+sum(State == "Massachusetts")  #still 15 men but they will match up with random beer consumption
+MassAvg <- sum(BW$Beer*(Gender=="M"))/sum(Gender=="M"); MaleAvg
+FemaleAvg <- sum(BW$Beer*(Gender=="F"))/sum(Gender=="F"); FemaleAvg
+MaleAvg - FemaleAvg    #as likely to be negative or positive
+#Repeat 10000 times
+N <- 10000
+diffs <- numeric(N)
+for (i in 1:N){
+  Gender <- sample(BW$Gender); Gender   #permuted gender column
+  MaleAvg <- sum(BW$Beer*(Gender=="M"))/sum(Gender=="M"); MaleAvg
+  FemaleAvg <- sum(BW$Beer*(Gender=="F"))/sum(Gender=="F"); FemaleAvg
+  diffs[i] <- MaleAvg - FemaleAvg    #as likely to be negative or positive
+}
+mean(diffs) #should be close to zero
+hist(diffs, breaks = "FD")
+#Now display the observed difference on the histogram
+abline(v = observed, col = "red")
+#What is the probability (the P value) that a difference this large
+#could have arisen with a random subset?
+pvalue <- (sum(diffs >= observed)+1)/(N+1); pvalue
+
+
+# Trying to fit a beta distribution (ignore for now)
+#alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
+#beta <- alpha * (1 / mu - 1)
+#dbeta(clean$Income, alpha, beta, ncp = 0, log = FALSE, add = TRUE)
+
 
 #Storing predictor variables
 #Order data in stata so all predictors appear in right-most columns
 vars <- colnames(clean[18:ncol(clean)])
 vars
-summary(vars)
 
 #OLS Regression
 to_hat <- with(clean[clean$Income>0,], lm(reformulate(vars, "Income")))
@@ -51,24 +97,26 @@ rank_hat_ols = predict(to_hat, newdata=clean)
 summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
 vars
 
-#Decision Tree or Regression Tree
-one_tree <- rpart(reformulate(vars, "Income")
-                  , data=clean
-                  , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
-
-one_tree #Text Representation of Tree
-rank_hat_tree <- predict(one_tree, newdata=clean)
-table(rank_hat_tree)
-hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
-
-plot(one_tree) # plot tree
-text(one_tree) # add labels to tree
-# print complexity parameter table using cross validation
-printcp(one_tree)
-
-#Random Forest from 1000 Bootstrapped Samples
-forest_hat <- randomForest(reformulate(vars, "Income"), ntree=1000, mtry=11, maxnodes=100
-                           ,importance=TRUE, do.trace=25, data=clean[clean$Income>0,])
-getTree(forest_hat, 250, labelVar = TRUE) #Text Representation of Tree
-rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
-summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
+# 
+# 
+# #Decision Tree or Regression Tree
+# one_tree <- rpart(reformulate(vars, "Income")
+#                   , data=clean
+#                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
+# 
+# one_tree #Text Representation of Tree
+# rank_hat_tree <- predict(one_tree, newdata=clean)
+# table(rank_hat_tree)
+# hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
+# 
+# plot(one_tree) # plot tree
+# text(one_tree) # add labels to tree
+# # print complexity parameter table using cross validation
+# printcp(one_tree)
+# 
+# #Random Forest from 500 Bootstrapped Samples
+# forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=11, maxnodes=100
+#                            ,importance=TRUE, do.trace=25, data=clean[clean$Income>0,])
+# getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
+# rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
+# summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
