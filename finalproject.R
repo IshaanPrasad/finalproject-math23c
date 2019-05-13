@@ -1,7 +1,6 @@
 rm(list=ls())
 set.seed(123)
 
-
 #Change this to location of your data
 setwd("/Users/abhishekmalani/Desktop/Math 23C/finalproject-math23c")
 
@@ -219,6 +218,7 @@ barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,p
 
 
 ### 95% Confidence Interval ###
+#Point 20 - confidence interval
 commute = clean$MeanCommute 
 µ = mean(commute); µ  #population mean
 sigma = sd(commute); sigma  #population standard deviation
@@ -226,10 +226,10 @@ hist(commute, probability = T)  #looks approximately normal, just a little bit s
 f = function(x) dnorm(x,µ, sigma)
 curve(f, add=T, col = "blue")
 
-N = length(commute)
+N = length(commute); N
 n = 5000
 
-sample = sample(N,n)
+sample = sample(N,n) #Point 2 - drew random samples from large (72727 entries) population
 xbar = mean(commute[sample])  #sample mean
 s = sd(commute[sample]);s  #sample standard deviation
 
@@ -256,6 +256,6 @@ abline (v = µ, col = "red") #vertical line at population mean
 counter/100  #around 95% most of the time
 
 ################## end Massimo ################## 
-#.
+
 
 
