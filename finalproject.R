@@ -9,6 +9,7 @@ if (!require(foreign)) install.packages("foreign"); library(foreign)
 if (!require(haven)) install.packages("haven"); library(haven)
 if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
 if (!require(rpart)) install.packages("rpart"); library(rpart)
+if (!require(stats4)) install.packages("stats4"); library(stats4)
 
 census <- read.csv("finalproject.csv")
 head(census)
@@ -168,14 +169,17 @@ vars
 # summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 
 
-####bar plot
+
+################## Massimo ################## 
+
+### bar plot ###
 income = clean$Income
-hispanic = which(clean$Hispanic>75);  length(mostlyhispanic)
-white = which(clean$White>75); length(mostlywhite)
-black = which(clean$Black>75);  length(mostlyblack)
-native = which(clean$Native>75); length(mostlynative)
-asian = which(clean$Asian>75); length(mostlyasian)
-pacific = which(clean$Pacific>75); length(mostlypacific)
+hispanic = which(clean$Hispanic>50);  length(hispanic)
+white = which(clean$White>50); length(white)
+black = which(clean$Black>50);  length(black)
+native = which(clean$Native>50); length(native)
+asian = which(clean$Asian>50); length(asian)
+pacific = which(clean$Pacific>50); length(pacific)
 
 #income
 mostlywhite = clean$Income[white]
@@ -212,5 +216,46 @@ pacificpoverty = mean(mostlypacific)
 
 whitepoverty; blackpoverty;hispanicpoverty;asianpoverty;nativepoverty;pacificpoverty
 barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty")
+
+
+### 95% Confidence Interval ###
+commute = clean$MeanCommute 
+µ = mean(commute); µ  #population mean
+sigma = sd(commute); sigma  #population standard deviation
+hist(commute, probability = T)  #looks approximately normal, just a little bit skewed to the right
+f = function(x) dnorm(x,µ, sigma)
+curve(f, add=T, col = "blue")
+
+N = length(commute)
+n = 5000
+
+sample = sample(N,n)
+xbar = mean(commute[sample])  #sample mean
+s = sd(commute[sample]);s  #sample standard deviation
+
+lower = xbar - 1.96*s/sqrt(n); lower 
+upper = xbar + 1.96*s/sqrt(n); upper
+
+counter <- 0
+plot(x =c(µ-2,µ+2), y = c(1,100), type = "n", xlab = "", ylab = "") 
+for (i in 1:100) {
+  sample = sample(N,n)
+  xbar = mean(commute[sample])
+  s = sd(commute[sample])
+  lower = xbar - 1.96*s/sqrt(n)
+  upper = xbar + 1.96*s/sqrt(n)
+  if (lower < µ && µ < upper) counter <- counter + 1 
+  if(i <= 100) {
+    points(lower, i, pch= 22)
+    points(upper, i, pch= 23)
+    segments(lower, i, upper, i)
+  }    
+}
+abline (v = µ, col = "red") #vertical line at population mean
+#What percentage of the time does the interval contain the population mean?
+counter/100  #around 95% most of the time
+
+################## end Massimo ################## 
+#.
 
 
