@@ -165,93 +165,120 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 
 
-################## Massimo ################## 
-
-### bar plot ###
-income = clean$Income
-hispanic = which(clean$Hispanic>50);  length(hispanic)
-white = which(clean$White>50); length(white)
-black = which(clean$Black>50);  length(black)
-native = which(clean$Native>50); length(native)
-asian = which(clean$Asian>50); length(asian)
-pacific = which(clean$Pacific>50); length(pacific)
-
-#income
-mostlywhite = clean$Income[white]
-mostlyblack = clean$Income[black]
-mostlyhispanic = clean$Income[hispanic]
-mostlyasian = clean$Income[asian]
-mostlynative = clean$Income[native]
-mostlypacific = clean$Income[pacific]
-
-whiteincome = mean(mostlywhite)
-blackincome = mean(mostlyblack)
-hispanicincome = mean(mostlyhispanic)
-asianincome = mean(mostlyasian)
-nativeincome = mean(mostlynative)
-pacificincome = mean(mostlypacific)
-
-whiteincome; blackincome;hispanicincome;asianincome;nativeincome;pacificincome
-barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income")
-
-#Poverty
-mostlywhite = clean$Poverty[white]
-mostlyblack = clean$Poverty[black]
-mostlyhispanic = clean$Poverty[hispanic]
-mostlyasian = clean$Poverty[asian]
-mostlynative = clean$Poverty[native]
-mostlypacific = clean$Poverty[pacific]
-
-whitepoverty = mean(mostlywhite)
-blackpoverty = mean(mostlyblack)
-hispanicpoverty = mean(mostlyhispanic)
-asianpoverty = mean(mostlyasian)
-nativepoverty = mean(mostlynative)
-pacificpoverty = mean(mostlypacific)
-
-whitepoverty; blackpoverty;hispanicpoverty;asianpoverty;nativepoverty;pacificpoverty
-barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty")
-
-
-### 95% Confidence Interval ###
-#Point 20 - confidence interval
-commute = clean$MeanCommute 
-µ = mean(commute); µ  #population mean
-sigma = sd(commute); sigma  #population standard deviation
-hist(commute, probability = T)  #looks approximately normal, just a little bit skewed to the right
-f = function(x) dnorm(x,µ, sigma)
-curve(f, add=T, col = "blue")
-
-N = length(commute); N
-n = 5000
-
-sample = sample(N,n) #Point 2 - drew random samples from large (72727 entries) population
-xbar = mean(commute[sample])  #sample mean
-s = sd(commute[sample]);s  #sample standard deviation
-
-lower = xbar - 1.96*s/sqrt(n); lower 
-upper = xbar + 1.96*s/sqrt(n); upper
-
-counter <- 0
-plot(x =c(µ-2,µ+2), y = c(1,100), type = "n", xlab = "", ylab = "") 
-for (i in 1:100) {
-  sample = sample(N,n)
-  xbar = mean(commute[sample])
-  s = sd(commute[sample])
-  lower = xbar - 1.96*s/sqrt(n)
-  upper = xbar + 1.96*s/sqrt(n)
-  if (lower < µ && µ < upper) counter <- counter + 1 
-  if(i <= 100) {
-    points(lower, i, pch= 22)
-    points(upper, i, pch= 23)
-    segments(lower, i, upper, i)
-  }    
-}
-abline (v = µ, col = "red") #vertical line at population mean
-#What percentage of the time does the interval contain the population mean?
-counter/100  #around 95% most of the time
-
-################## end Massimo ################## 
+ ################## Massimo ################## 
+ 
+ ### Bar Plots ###
+ income = clean$Income
+ hispanic = which(clean$Hispanic>50);  length(hispanic)
+ white = which(clean$White>50); length(white)
+ black = which(clean$Black>50);  length(black)
+ native = which(clean$Native>50); length(native)
+ asian = which(clean$Asian>50); length(asian)
+ pacific = which(clean$Pacific>50); length(pacific)
+ 
+ #income
+ mostlywhite = clean$Income[white]
+ mostlyblack = clean$Income[black]
+ mostlyhispanic = clean$Income[hispanic]
+ mostlyasian = clean$Income[asian]
+ mostlynative = clean$Income[native]
+ mostlypacific = clean$Income[pacific]
+ 
+ whiteincome = mean(mostlywhite)
+ blackincome = mean(mostlyblack)
+ hispanicincome = mean(mostlyhispanic)
+ asianincome = mean(mostlyasian)
+ nativeincome = mean(mostlynative)
+ pacificincome = mean(mostlypacific)
+ 
+ whiteincome; blackincome;hispanicincome;asianincome;nativeincome;pacificincome
+ barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income")
+ 
+ #Poverty
+ mostlywhite = clean$Poverty[white]
+ mostlyblack = clean$Poverty[black]
+ mostlyhispanic = clean$Poverty[hispanic]
+ mostlyasian = clean$Poverty[asian]
+ mostlynative = clean$Poverty[native]
+ mostlypacific = clean$Poverty[pacific]
+ 
+ whitepoverty = mean(mostlywhite)
+ blackpoverty = mean(mostlyblack)
+ hispanicpoverty = mean(mostlyhispanic)
+ asianpoverty = mean(mostlyasian)
+ nativepoverty = mean(mostlynative)
+ pacificpoverty = mean(mostlypacific)
+ 
+ whitepoverty; blackpoverty;hispanicpoverty;asianpoverty;nativepoverty;pacificpoverty
+ barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty")
+ 
+ 
+ ### 95% Confidence Interval ###
+ #Point 20 - confidence interval
+ commute = clean$MeanCommute 
+ µ = mean(commute); µ  #population mean
+ sigma = sd(commute); sigma  #population standard deviation
+ hist(commute, probability = T)  #looks approximately normal, just a little bit skewed to the right
+ f = function(x) dnorm(x,µ, sigma)
+ curve(f, add=T, col = "blue")
+ 
+ N = length(commute); N
+ n = 5000
+ 
+ sample = sample(N,n) #Point 2 - drew random samples from large population (72727 entries) 
+ xbar = mean(commute[sample])  #sample mean
+ s = sd(commute[sample]);s  #sample standard deviation
+ 
+ lower = xbar - 1.96*s/sqrt(n); lower 
+ upper = xbar + 1.96*s/sqrt(n); upper
+ 
+ counter <- 0
+ plot(x =c(µ-2,µ+2), y = c(1,100), type = "n", xlab = "", ylab = "") 
+ for (i in 1:100) {
+   sample = sample(N,n)
+   xbar = mean(commute[sample])
+   s = sd(commute[sample])
+   lower = xbar - 1.96*s/sqrt(n)
+   upper = xbar + 1.96*s/sqrt(n)
+   if (lower < µ && µ < upper) counter <- counter + 1 
+   if(i <= 100) {
+     points(lower, i, pch= 22)
+     points(upper, i, pch= 23)
+     segments(lower, i, upper, i)
+   }    
+ }
+ abline (v = µ, col = "red") #vertical line at population mean
+ #What percentage of the time does the interval contain the population mean?
+ counter/100  #around 95% most of the time
+ 
+ ### Logistic Regression ###
+ #Point 15 - logistic regression curve
+ income = clean$Income
+ hist(income)
+ mass = which(clean$State == "Massachusetts") #look at just tracts in Massachusetts
+ professional = clean$Professional[mass] #independent variable is the percentage of workers employed in management, business, science, and arts
+ hist(professional)
+ 
+ 
+ wealthy <- (as.numeric(income[mass]>=50000)); head(wealthy) #threshold for being a "wealthy" county is average income above $50,000
+ plot(professional,wealthy)  
+ 
+ MLL<- function(alpha, beta) {
+   -sum( log( exp(alpha+beta*professional)/(1+exp(alpha+beta*professional)) )*wealthy
+         + log(1/(1+exp(alpha+beta*professional)))*(1-wealthy) )
+ }
+ results<-mle(MLL, start = list(alpha = 0, beta = 0)) #an initial guess is required
+ results@coef
+ curve( exp(results@coef[1]+results@coef[2]*x)/ (1+exp(results@coef[1]+results@coef[2]*x)),col = "blue", add=TRUE)
+ abline(v=20, col = "red"); abline(v=40, col = "green")
+ index <- which(professional >= 19 & professional <= 21); head(index)   #evaluated in a small range of values around 20, because very few tracts were exactly equal to 20 and might not give an accurate estimate
+ a = mean(wealthy[index]); a   #21% wealthy tracts 
+ abline(h=a, col = "red")  #not bad
+ index <- which(professional >= 39 & professional <= 41); head(index)   #evaluated in a small range of values around 40, because very few tracts were exactly equal to 40 and might not give an accurate estimate
+ b = mean(wealthy[index]); b   #87% wealthy tracts
+ abline(h=b, col = "green")  #pretty good
+ 
+ ################## end Massimo ################## 
 
 
 
