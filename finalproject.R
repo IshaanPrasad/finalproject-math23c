@@ -2,8 +2,7 @@ rm(list=ls())
 set.seed(123)
 
 #Change this to location of your data
-#setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
-setwd("/Users/abhishekmalani/Desktop/Math 23C/finalproject-math23c")
+setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
 
 if (!require(foreign)) install.packages("foreign"); library(foreign)
 if (!require(haven)) install.packages("haven"); library(haven)
@@ -46,47 +45,55 @@ sigma <- sd(clean$Income)     #estimates square root of the population variance
 curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
 
 #Visualizng the percentage of a race in a population w.r.t. the average income of the population
+percentA <- clean$Asian / 100       # Asian
+percentB <- clean$Black / 100       # Black
+percentH <- clean$Hispanic / 100    # Hispanic
+percentN <- clean$Native / 100      # Native
+percentP <- clean$Pacific / 100     # Pacific
+percentW <- clean$White / 100       # White
 income <-  clean$Income
-# ggplotting the data (not finished)
+# ggplotting the data: fulfilling "Nicely labeled graphics using ggplot, with good use of color, line styles, etc., that tell a convincing story"
 df <- data.frame(
-  percentA <- clean$Asian / 100,       # Asian
-  percentB <- clean$Black / 100,       # Black
-  percentH <- clean$Hispanic / 100,    # Hispanic
-  percentN <- clean$Native / 100,      # Native
-  percentP <- clean$Pacific / 100,     # Pacific
-  percentW <- clean$White / 100,       # White
-  income <-  clean$Income
+  percentA,      # Asian
+  percentB,      # Black
+  percentH,   # Hispanic
+  percentN,    # Native
+  percentP,  # Pacific
+  percentW,       # White
+  income
 )
+
+# Asian
 ggplot(df, aes(percentA, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
   xlab("Percent of Asian People in Tract") +
   ylab("Average Income of Tract")
-
+# Black
 ggplot(df, aes(percentB, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
   xlab("Percent of Black People in Tract") +
   ylab("Average Income of Tract")
-
+# Hispanic
 ggplot(df, aes(percentH, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
   xlab("Percent of Hispanic People in Tract") +
   ylab("Average Income of Tract")
-
+# Native
 ggplot(df, aes(percentN, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
   xlab("Percent of Native People in Tract") +
   ylab("Average Income of Tract")
-
+# Pacific
 ggplot(df, aes(percentP, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
   xlab("Percent of Pacific People in Tract") +
   ylab("Average Income of Tract")
-
+# White
 ggplot(df, aes(percentW, income)) + 
   geom_point(color = "red", size = 0.5) + 
   geom_smooth(method = "lm", color ="blue") +
@@ -106,32 +113,30 @@ abline(lm(income ~ percentP), col = "violet") # Pacific
 
 
 #Trying to do Permutation Test here 
-sum(clean$County == "Suffolk"); sum(clean$County == "Cook")
+sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
 #Not an equal amount so we will randomly sample 1172 counties from MA
 
 MaSample <- sample (clean$State == "Massachusetts", size=1172, replace =F)
 length(MaSample)
-
 #Calculate the observed beer consumption difference by State
-
-IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
-MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
-observed <- IlAvg - MAAvg; observed
+MassAvg <- sum(clean$Income*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MassAvg
+AlabAvg <- sum(clean$Income*(clean$State == "Alabama"))/sum(clean$State == "Alabama");AlabAvg
+observed <- MassAvg - AlabAvg; observed     #the men drank more beer
 
 #Now replace Massachusetts with a random sample of all the data
 State <- sample(clean$State); State   #permuted State column
-sum(State == "New York")  #still 15 men but they will match up with random beer consumption
-IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
-MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
-IlAvg - MAAvg   #as likely to be negative or positive
+sum(State == "Massachusetts")  #still 15 men but they will match up with random beer consumption
+MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
+AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
+MassAvg - AlabAvg    #as likely to be negative or positive
 #Repeat 10000 times
-N <- 1000
+N <- 10000
 diffs <- numeric(N)
 for (i in 1:N){
   State <- sample(clean$State); State   #permuted State column
-  IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
-  MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
-  diffs[i] <- IlAvg - MAAvg    #as likely to be negative or positive
+  MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
+  AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
+  diffs[i] <- MassAvg - AlabAvg    #as likely to be negative or positive
 }
 mean(diffs) #should be close to zero
 hist(diffs, breaks = "FD")
@@ -139,35 +144,12 @@ hist(diffs, breaks = "FD")
 abline(v = observed, col = "red")
 #What is the probability (the P value) that a difference this large
 #could have arisen with a random subset?
-pvalue <- 2*(1 -(sum(diffs >= observed)+1)/(N+1)); pvalue #two sided significance test
+pvalue <- (sum(diffs >= observed)+1)/(N+1); pvalue
 
-
-ChicagoAvg <- sum(clean$Transit*(clean$County == "Cook"))/sum(clean$County == "Cook"); ChicagoAvg
-BostonAvg <- sum(clean$Transit*(clean$County == "Suffolk"))/sum(clean$County == "Suffolk"); BostonAvg
-observed <- ChicagoAvg - BostonAvg; observed
-
-#Now replace Massachusetts with a random sample of all the data
-County <- sample(clean$County); County   #permuted State column
-sum(State == "New York")  #still 15 men but they will match up with random beer consumption
-ChicagoAvg <- sum(clean$Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
-BostonAvg <- sum(clean$Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
-ChicagoAvg - BostonAvg  #as likely to be negative or positive
-#Repeat 10000 times
-N <- 1000
-diffs <- numeric(N)
-for (i in 1:N){
-  County <- sample(clean$County); County   #permuted State column
-  ChicagoAvg <- sum(clean$Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
-  BostonAvg <- sum(clean$Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
-  diffs[i] <- ChicagoAvg - BostonAvg    #as likely to be negative or positive
-}
-mean(diffs) #should be close to zero
-hist(diffs, xlim=c(-6,6), breaks = "FD")
-#Now display the observed difference on the histogram
-abline(v = observed, col = "red")
-#What is the probability (the P value) that a difference this large
-#could have arisen with a random subset?
-pvalue <- 2*(sum(diffs >= observed)+1)/(N+1); pvalue #two sided test
+# Trying to fit a beta distribution (ignore for now)
+#alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
+#beta <- alpha * (1 / mu - 1)
+#dbeta(clean$Income, alpha, beta, ncp = 0, log = FALSE, add = TRUE)
 
 
 #Storing predictor variables
@@ -183,20 +165,20 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
 
 # 
 # 
-#Decision Tree or Regression Tree
-one_tree <- rpart(reformulate(vars, "Income")
-                   , data=clean
-                   , control = rpart.control(xval = 5)) ## this sets the number of folds for cross validation.
- 
- one_tree #Text Representation of Tree
- rank_hat_tree <- predict(one_tree, newdata=clean)
- table(rank_hat_tree)
- hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
- 
- plot(one_tree) # plot tree
- text(one_tree) # add labels to tree
- # print complexity parameter table using cross validation
- printcp(one_tree)
+# #Decision Tree or Regression Tree
+# one_tree <- rpart(reformulate(vars, "Income")
+#                   , data=clean
+#                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
+# 
+# one_tree #Text Representation of Tree
+# rank_hat_tree <- predict(one_tree, newdata=clean)
+# table(rank_hat_tree)
+# hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
+# 
+# plot(one_tree) # plot tree
+# text(one_tree) # add labels to tree
+# # print complexity parameter table using cross validation
+# printcp(one_tree)
 # 
 # #Random Forest from 500 Bootstrapped Samples
  forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=20, maxnodes=50
@@ -205,9 +187,6 @@ one_tree <- rpart(reformulate(vars, "Income")
  rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
  summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 
-plot(forest_hat) # plot tree
-text(forest_hat) # add labels to tree
-printcp(forest_hat)
 
  ################## Massimo ################## 
  
