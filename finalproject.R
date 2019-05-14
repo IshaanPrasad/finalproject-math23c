@@ -2,7 +2,8 @@ rm(list=ls())
 set.seed(123)
 
 #Change this to location of your data
-setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
+#setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
+setwd("/Users/abhishekmalani/Desktop/Math 23C/finalproject-math23c")
 
 if (!require(foreign)) install.packages("foreign"); library(foreign)
 if (!require(haven)) install.packages("haven"); library(haven)
@@ -105,30 +106,32 @@ abline(lm(income ~ percentP), col = "violet") # Pacific
 
 
 #Trying to do Permutation Test here 
-sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
+sum(clean$County == "Suffolk"); sum(clean$County == "Cook")
 #Not an equal amount so we will randomly sample 1172 counties from MA
 
 MaSample <- sample (clean$State == "Massachusetts", size=1172, replace =F)
 length(MaSample)
+
 #Calculate the observed beer consumption difference by State
-MassAvg <- sum(clean$Income*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MassAvg
-AlabAvg <- sum(clean$Income*(clean$State == "Alabama"))/sum(clean$State == "Alabama");AlabAvg
-observed <- MassAvg - AlabAvg; observed     #the men drank more beer
+
+IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
+MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
+observed <- IlAvg - MAAvg; observed
 
 #Now replace Massachusetts with a random sample of all the data
 State <- sample(clean$State); State   #permuted State column
-sum(State == "Massachusetts")  #still 15 men but they will match up with random beer consumption
-MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
-AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
-MassAvg - AlabAvg    #as likely to be negative or positive
+sum(State == "New York")  #still 15 men but they will match up with random beer consumption
+IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
+MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
+IlAvg - MAAvg   #as likely to be negative or positive
 #Repeat 10000 times
-N <- 10000
+N <- 1000
 diffs <- numeric(N)
 for (i in 1:N){
   State <- sample(clean$State); State   #permuted State column
-  MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
-  AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
-  diffs[i] <- MassAvg - AlabAvg    #as likely to be negative or positive
+  IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
+  MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
+  diffs[i] <- IlAvg - MAAvg    #as likely to be negative or positive
 }
 mean(diffs) #should be close to zero
 hist(diffs, breaks = "FD")
@@ -136,12 +139,35 @@ hist(diffs, breaks = "FD")
 abline(v = observed, col = "red")
 #What is the probability (the P value) that a difference this large
 #could have arisen with a random subset?
-pvalue <- (sum(diffs >= observed)+1)/(N+1); pvalue
+pvalue <- 2*(1 -(sum(diffs >= observed)+1)/(N+1)); pvalue #two sided significance test
 
-# Trying to fit a beta distribution (ignore for now)
-#alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
-#beta <- alpha * (1 / mu - 1)
-#dbeta(clean$Income, alpha, beta, ncp = 0, log = FALSE, add = TRUE)
+
+ChicagoAvg <- sum(clean$Transit*(clean$County == "Cook"))/sum(clean$County == "Cook"); ChicagoAvg
+BostonAvg <- sum(clean$Transit*(clean$County == "Suffolk"))/sum(clean$County == "Suffolk"); BostonAvg
+observed <- ChicagoAvg - BostonAvg; observed
+
+#Now replace Massachusetts with a random sample of all the data
+County <- sample(clean$County); County   #permuted State column
+sum(State == "New York")  #still 15 men but they will match up with random beer consumption
+ChicagoAvg <- sum(clean$Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
+BostonAvg <- sum(clean$Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
+ChicagoAvg - BostonAvg  #as likely to be negative or positive
+#Repeat 10000 times
+N <- 1000
+diffs <- numeric(N)
+for (i in 1:N){
+  County <- sample(clean$County); County   #permuted State column
+  ChicagoAvg <- sum(clean$Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
+  BostonAvg <- sum(clean$Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
+  diffs[i] <- ChicagoAvg - BostonAvg    #as likely to be negative or positive
+}
+mean(diffs) #should be close to zero
+hist(diffs, xlim=c(-6,6), breaks = "FD")
+#Now display the observed difference on the histogram
+abline(v = observed, col = "red")
+#What is the probability (the P value) that a difference this large
+#could have arisen with a random subset?
+pvalue <- 2*(sum(diffs >= observed)+1)/(N+1); pvalue #two sided test
 
 
 #Storing predictor variables
@@ -157,20 +183,20 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
 
 # 
 # 
-# #Decision Tree or Regression Tree
-# one_tree <- rpart(reformulate(vars, "Income")
-#                   , data=clean
-#                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
-# 
-# one_tree #Text Representation of Tree
-# rank_hat_tree <- predict(one_tree, newdata=clean)
-# table(rank_hat_tree)
-# hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
-# 
-# plot(one_tree) # plot tree
-# text(one_tree) # add labels to tree
-# # print complexity parameter table using cross validation
-# printcp(one_tree)
+#Decision Tree or Regression Tree
+one_tree <- rpart(reformulate(vars, "Income")
+                   , data=clean
+                   , control = rpart.control(xval = 5)) ## this sets the number of folds for cross validation.
+ 
+ one_tree #Text Representation of Tree
+ rank_hat_tree <- predict(one_tree, newdata=clean)
+ table(rank_hat_tree)
+ hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
+ 
+ plot(one_tree) # plot tree
+ text(one_tree) # add labels to tree
+ # print complexity parameter table using cross validation
+ printcp(one_tree)
 # 
 # #Random Forest from 500 Bootstrapped Samples
  forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=20, maxnodes=50
@@ -179,6 +205,9 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
  summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 
+plot(forest_hat) # plot tree
+text(forest_hat) # add labels to tree
+printcp(forest_hat)
 
  ################## Massimo ################## 
  
