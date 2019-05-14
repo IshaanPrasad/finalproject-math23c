@@ -95,26 +95,25 @@ sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
 
 MaSample <- sample (clean$State == "Massachusetts", size=1172, replace =F)
 length(MaSample)
-
-#Calculate the observed beer consumption difference by gender
+#Calculate the observed beer consumption difference by State
 MassAvg <- sum(clean$Income*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MassAvg
 AlabAvg <- sum(clean$Income*(clean$State == "Alabama"))/sum(clean$State == "Alabama");AlabAvg
 observed <- MassAvg - AlabAvg; observed     #the men drank more beer
 
-#Now replace Male with a random sample of 15 customers
-State <- sample(clean$State); State   #permuted gender column
+#Now replace Massachusetts with a random sample of all the data
+State <- sample(clean$State); State   #permuted State column
 sum(State == "Massachusetts")  #still 15 men but they will match up with random beer consumption
-MassAvg <- sum(BW$Beer*(Gender=="M"))/sum(Gender=="M"); MaleAvg
-FemaleAvg <- sum(BW$Beer*(Gender=="F"))/sum(Gender=="F"); FemaleAvg
-MaleAvg - FemaleAvg    #as likely to be negative or positive
+MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
+AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
+MassAvg - AlabAvg    #as likely to be negative or positive
 #Repeat 10000 times
 N <- 10000
 diffs <- numeric(N)
 for (i in 1:N){
-  Gender <- sample(BW$Gender); Gender   #permuted gender column
-  MaleAvg <- sum(BW$Beer*(Gender=="M"))/sum(Gender=="M"); MaleAvg
-  FemaleAvg <- sum(BW$Beer*(Gender=="F"))/sum(Gender=="F"); FemaleAvg
-  diffs[i] <- MaleAvg - FemaleAvg    #as likely to be negative or positive
+  State <- sample(clean$State); State   #permuted State column
+  MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
+  AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
+  diffs[i] <- MassAvg - AlabAvg    #as likely to be negative or positive
 }
 mean(diffs) #should be close to zero
 hist(diffs, breaks = "FD")
@@ -123,7 +122,6 @@ abline(v = observed, col = "red")
 #What is the probability (the P value) that a difference this large
 #could have arisen with a random subset?
 pvalue <- (sum(diffs >= observed)+1)/(N+1); pvalue
-
 
 # Trying to fit a beta distribution (ignore for now)
 #alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
@@ -141,7 +139,6 @@ to_hat <- with(clean[clean$Income>0,], lm(reformulate(vars, "Income")))
 summary(to_hat)
 rank_hat_ols = predict(to_hat, newdata=clean)
 summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
-vars
 
 # 
 # 
@@ -161,12 +158,11 @@ vars
 # printcp(one_tree)
 # 
 # #Random Forest from 500 Bootstrapped Samples
-# forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=11, maxnodes=100
-#                            ,importance=TRUE, do.trace=25, data=clean[clean$Income>0,])
-# getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
-# rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
-# summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
-
+ forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=20, maxnodes=50
+                            ,importance=TRUE, do.trace=25, data=clean[clean$Income>0,])
+ getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
+ rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
+ summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
 
 
 ################## Massimo ################## 
