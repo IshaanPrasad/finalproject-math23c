@@ -2,13 +2,14 @@ rm(list=ls())
 set.seed(123)
 
 #Change this to location of your data
-setwd("/Users/abhishekmalani/Desktop/Math 23C/finalproject-math23c")
+setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
 
 if (!require(foreign)) install.packages("foreign"); library(foreign)
 if (!require(haven)) install.packages("haven"); library(haven)
 if (!require(randomForest)) install.packages("randomForest"); library(randomForest)
 if (!require(rpart)) install.packages("rpart"); library(rpart)
 if (!require(stats4)) install.packages("stats4"); library(stats4)
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
 
 census <- read.csv("finalproject.csv")
 head(census)
@@ -43,29 +44,53 @@ var <- var(clean$Income)
 sigma <- sd(clean$Income)     #estimates square root of the population variance
 curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
 
-################## Ishaan ################## 
-
 #Visualizng the percentage of a race in a population w.r.t. the average income of the population
 income <-  clean$Income
-# Scatterplots
-# Hispanic
-percentH <- clean$Hispanic / 100
-plot(percentH, income, pch=".")
-# White
-percentW <- clean$White / 100
-plot(percentW, income, pch=".")
-# Black
-percentB <- clean$Black / 100
-plot(percentB, income, pch=".", add = TRUE)
-# Native
-percentN <- clean$Native / 100
-plot(percentN, income, pch=".")
-# Asian
-percentA <- clean$Asian / 100
-plot(percentA, income, pch=".")
-# Pacific
-percentP <- clean$Pacific / 100
-plot(percentP, income, pch=".")
+# ggplotting the data (not finished)
+df <- data.frame(
+  percentA <- clean$Asian / 100,       # Asian
+  percentB <- clean$Black / 100,       # Black
+  percentH <- clean$Hispanic / 100,    # Hispanic
+  percentN <- clean$Native / 100,      # Native
+  percentP <- clean$Pacific / 100,     # Pacific
+  percentW <- clean$White / 100,       # White
+  income <-  clean$Income
+)
+ggplot(df, aes(percentA, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of Asian People in Tract") +
+  ylab("Average Income of Tract")
+
+ggplot(df, aes(percentB, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of Black People in Tract") +
+  ylab("Average Income of Tract")
+
+ggplot(df, aes(percentH, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of Hispanic People in Tract") +
+  ylab("Average Income of Tract")
+
+ggplot(df, aes(percentN, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of Native People in Tract") +
+  ylab("Average Income of Tract")
+
+ggplot(df, aes(percentP, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of Pacific People in Tract") +
+  ylab("Average Income of Tract")
+
+ggplot(df, aes(percentW, income)) + 
+  geom_point(color = "red", size = 0.5) + 
+  geom_smooth(method = "lm", color ="blue") +
+  xlab("Percent of White People in Tract") +
+  ylab("Average Income of Tract")
 
 # Linear regression on the above scatter plots
 Percent <- c(0,1)
@@ -77,16 +102,6 @@ abline(lm(income ~ percentB), col = "yellow") # Black
 abline(lm(income ~ percentN), col = "green") # Native
 abline(lm(income ~ percentA), col = "blue") # Asian
 abline(lm(income ~ percentP), col = "violet") # Pacific
-
-# ggplotting the data (not finished)
-df <- data.frame(
-  percentA <- clean$Asian / 100,
-  income <-  clean$Income
-)
-ggplot(df, aes(percentA, income)) + 
-  geom_point(color = "red", size = 0.5)
-
-################## End Ishaan ################## 
 
 
 #Trying to do Permutation Test here 
