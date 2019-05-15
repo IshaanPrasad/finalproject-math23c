@@ -300,8 +300,38 @@ set.seed(123)
     nativeincome = mean(mostlynative); nativeincome
     pacificincome = mean(mostlypacific); pacificincome
     # Visualize Mean Income by Race
-    barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income")
-     
+    barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income by Predominant Racial Group in Tract", xlab = "Race", ylab = "Income ($)", col = rgb(0,0.3,0.7,0.4))
+    
+    #Predominantly Asian tracts have the highest average income
+    #Is it significantly greater than each other race?
+    w = asianincome - whiteincome
+    b = asianincome - blackincome
+    h = asianincome - hispanicincome
+    n = asianincome - nativeincome
+    p = asianincome - pacificincome
+    
+    s.w = var(mostlywhite)/length(mostlywhite)
+    s.b = var(mostlyblack)/length(mostlyblack)
+    s.h = var(mostlyhispanic)/length(mostlyhispanic)
+    s.a = var(mostlyasian)/length(mostlyasian)
+    s.n = var(mostlynative)/length(mostlynative)
+    s.p = var(mostlypacific)/length(mostlypacific)
+    
+    t.w = w/sqrt(s.w+s.a)
+    t.b = b/sqrt(s.b+s.a)
+    t.h = h/sqrt(s.h+s.a)
+    t.n = n/sqrt(s.n+s.a)
+    t.p = p/sqrt(s.p+s.a)
+    
+    p.w = 1 - pnorm(t.w, 0, 1)
+    p.b = 1 - pnorm(t.b, 0, 1)
+    p.h = 1 - pnorm(t.h, 0, 1)
+    p.n = 1 - pnorm(t.n, 0, 1)
+    p.p = 1 - pnorm(t.p, 0, 1)
+    
+    p.w; p.b; p.h; p.n; p.p  #All of the differences are significant
+    
+    
   ## Poverty
     #Setup poverty variables
     mostlywhite = clean$Poverty[white]
@@ -318,8 +348,8 @@ set.seed(123)
     nativepoverty = mean(mostlynative); nativpoverty
     pacificpoverty = mean(mostlypacific); pacificpoverty
     # Visualize Mean Poverty by Race
-    barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty")
-     
+    barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty Rate by Predominant Racial Group in Tract", xlab = "Race", ylab = "Income ($)", col = rgb(0,0.7,0.3,0.4))
+    
  
  
 ## Calculating a 95% Confidence Interval
@@ -327,7 +357,7 @@ set.seed(123)
   commute = clean$MeanCommute 
   µ = mean(commute); µ  #population mean
   sigma = sd(commute); sigma  #population standard deviation
-  hist(commute, probability = T)  #looks approximately normal, just a little bit skewed to the right
+  hist(commute, probability = T, breaks = "fd", main = "Commute Time Distribution", xlab = "Commute Time (min)", ylab = "Density", col = rgb(.75,0,.25,.35))  #looks approximately normal, just a little bit skewed to the right
   f = function(x) dnorm(x,µ, sigma)
   curve(f, add=T, col = "blue")
   
@@ -342,7 +372,7 @@ set.seed(123)
   upper = xbar + 1.96*s/sqrt(n); upper
   
   counter <- 0
-  plot(x =c(µ-2,µ+2), y = c(1,100), type = "n", xlab = "", ylab = "") 
+  plot(x =c(µ-2,µ+2), y = c(1,100), type = "n",main = "95% Confidence Intervals", xlab = "Commute Time (min)", ylab = "Sample Number") 
   for (i in 1:100) {
    sample = sample(N,n)
    xbar = mean(commute[sample])
@@ -351,9 +381,9 @@ set.seed(123)
    upper = xbar + 1.96*s/sqrt(n)
    if (lower < µ && µ < upper) counter <- counter + 1 
    if(i <= 100) {
-     points(lower, i, pch= 22)
-     points(upper, i, pch= 23)
-     segments(lower, i, upper, i)
+     points(lower, i, pch= 22, col = "blue")
+     points(upper, i, pch= 23, col = "blue")
+     segments(lower, i, upper, i, col = "blue")
    }    
   }
   abline (v = µ, col = "red") #vertical line at population mean
@@ -363,14 +393,13 @@ set.seed(123)
   ### Logistic Regression ###
   #Point 15 - Calculation and display of a logistic regression curve.
   income = clean$Income
-  hist(income)
   mass = which(clean$State == "Massachusetts") #look at just tracts in Massachusetts
   professional = clean$Professional[mass] #independent variable is the percentage of workers employed in management, business, science, and arts
-  hist(professional)
+  hist(professional, breaks = "fd", main = "Distribution of Percentage of Professional Workers in Tract", xlab = "Percent Professional Workers", col = rgb(.4,.6,0,.5))
   
   
   wealthy <- (as.numeric(income[mass]>=50000)); head(wealthy) #threshold for being a "wealthy" county is average income above $50,000
-  plot(professional,wealthy)  
+  plot(professional,wealthy,xlab = "Percent Professional Workers", ylab = "Wealthy", main = "Wealthy by Percent Professional")  
   
   MLL<- function(alpha, beta) {
    -sum( log( exp(alpha+beta*professional)/(1+exp(alpha+beta*professional)) )*wealthy
@@ -423,7 +452,7 @@ set.seed(123)
   
   mean(diffs) 
   hist(diffs, breaks = "FD")
-  hist(diffs, breaks = "FD", xlim = c(-1.5,1.5))
+  hist(diffs, breaks = "FD", xlim = c(-1.5,1.5), col = rgb(0.2,0.2,0.6,0.4), main = "Histogram of Predicted Differences", xlab = "Difference", probability = T, ylab = "Density")
   #Now display the observed difference on the histogram
   abline(v = obs, col = "red")
   #What is the probability (the P value) that a difference this large could have arisen with a random subset?
@@ -437,7 +466,7 @@ set.seed(123)
 ## Skewness and Kurtosis of Drive
   #Point 13 - Appropriate use of novel statistics (e.g. trimmed mean, maximum or minimum, skewness, ratios)
   drive = clean$Drive
-  hist(drive, breaks = "fd") #looks like it's skewed pretty heavily to the left
+  hist(drive, breaks = "fd", main = "Distribution of Percentage of People Driving to Work in Tracts", xlab = "Percentage of People Who Drive to Work", col = "orange") #looks like it's skewed pretty heavily to the left
   N = length(drive)
   mu = mean(drive)
   s = sd(drive)
