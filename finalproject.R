@@ -237,7 +237,7 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  
  
  ### 95% Confidence Interval ###
- #Point 20 - confidence interval
+ #Point 20 - Calculation of a confidence interval.
  commute = clean$MeanCommute 
  µ = mean(commute); µ  #population mean
  sigma = sd(commute); sigma  #population standard deviation
@@ -248,7 +248,7 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  N = length(commute); N
  n = 5000
  
- sample = sample(N,n) #Point 2 - drew random samples from large population (72727 entries) 
+ sample = sample(N,n) #Point 2 - we drew random samples from a large population (72727 entries) 
  xbar = mean(commute[sample])  #sample mean
  s = sd(commute[sample]);s  #sample standard deviation
  
@@ -275,7 +275,7 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  counter/100  #around 95% most of the time
  
  ### Logistic Regression ###
- #Point 15 - logistic regression curve
+ #Point 15 - Calculation and display of a logistic regression curve.
  income = clean$Income
  hist(income)
  mass = which(clean$State == "Massachusetts") #look at just tracts in Massachusetts
@@ -303,8 +303,8 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  
  
  ### Walking in Chicago and Los Angeles ###
- #Point 9 - a relationship that might have been statistically significant but that turns out not to be so
- #We expect more people to walk to work in Los Angeles than in Chicago due to climate differences,
+ #Point 9 - A convincing demonstration of a relationship that might have been statistically significant but that turns out not to be so.
+ #We expect more people to walk to work in Los Angeles than in Chicago due to climate differences.
  chicago = which(clean$County == "Cook" & clean$State == "Illinois"); length(chicago)
  LA = which(clean$County == "Los Angeles"); length(LA)
  mean(clean$Walk[chicago]); mean(clean$Walk[LA]) 
@@ -345,6 +345,20 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  #The proportion of people who walk to work in Los Angeles is not statistically greater than the proportion of people who walk to work in Chicago.
  1-p
  #In fact, the opposite (Chicago > Los Angeles) is statistically significant surprisingly (1-p < 0.05).
+ 
+ 
+ 
+ ### Skewness and Kurtosis of Drive ###
+ #Point 13 - Appropriate use of novel statistics (e.g. trimmed mean, maximum or minimum, skewness, ratios)
+ drive = clean$Drive
+ hist(drive, breaks = "fd") #looks like it's skewed pretty heavily to the left
+ N = length(drive)
+ mu = mean(drive)
+ s = sd(drive)
+ skewness = sum(((drive - mu)^3)/(N*s^3)); skewness #skewness is -2.19
+ 
+ kurtosis = sum(((drive - mu)^4)/(N*s^4))-3; kurtosis #kurtosis is 5.74
+ 
  
  ################## end Massimo ################## 
 
