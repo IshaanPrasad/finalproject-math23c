@@ -301,6 +301,51 @@ summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
  b = mean(wealthy[index]); b   #87% wealthy tracts
  abline(h=b, col = "green")  #pretty good
  
+ 
+ ### Walking in Chicago and Los Angeles ###
+ #Point 9 - a relationship that might have been statistically significant but that turns out not to be so
+ #We expect more people to walk to work in Los Angeles than in Chicago due to climate differences,
+ chicago = which(clean$County == "Cook" & clean$State == "Illinois"); length(chicago)
+ LA = which(clean$County == "Los Angeles"); length(LA)
+ mean(clean$Walk[chicago]); mean(clean$Walk[LA]) 
+ obs = mean(clean$Walk[LA]) - mean(clean$Walk[chicago]); obs
+ 
+ #We can't just permute the County column, because Cook county exists in multiple states
+ #So we create a new city column
+ is.chicago = as.numeric(clean$County == "Cook" & clean$State == "Illinois"); head(is.chicago)
+ length(is.chicago); sum(is.chicago)  #Seems right
+ is.LA = as.numeric(clean$County == "Los Angeles", clean$State == "California"); head(is.LA)
+ length(is.LA); sum(is.LA)  #Seems right
+ city = is.chicago + 2*is.LA; head(city) #Since no tract is both in Chicago and Los Angeles, there is no overlap. Chicago tracts will be a 1, Los Angeles tracts are a 2, and everything else is 0
+ sum(city == 1); sum(city == 2)  #Perfect
+ 
+ #Now replace Chicago with a random sample of all the data
+ permute <- sample(city); head(permute)   #permuted city column
+ ChicagoAvg <- sum(clean$Walk*(permute == 1))/sum(permute == 1); ChicagoAvg
+ LosAvg <- sum(clean$Walk*(permute == 2))/sum(permute == 2); LosAvg
+ LosAvg - ChicagoAvg    #as likely to be negative or positive
+ 
+ #Repeat 10000 times
+ N <- 10000
+ diffs <- numeric(N)
+ for (i in 1:N){
+   permute <- sample(city); head(permute)   
+   ChicagoAvg <- sum(clean$Walk*(permute == 1))/sum(permute == 1)
+   LosAvg <- sum(clean$Walk*(permute == 2))/sum(permute == 2)
+   diffs[i] <- LosAvg - ChicagoAvg     
+ } #takes about a minute
+ 
+ mean(diffs) 
+ hist(diffs, breaks = "FD")
+ hist(diffs, breaks = "FD", xlim = c(-1.5,1.5))
+ #Now display the observed difference on the histogram
+ abline(v = obs, col = "red")
+ #What is the probability (the P value) that a difference this large could have arisen with a random subset?
+ p <- (sum(diffs >= obs)+1)/(N+1); p #greater than 0.05
+ #The proportion of people who walk to work in Los Angeles is not statistically greater than the proportion of people who walk to work in Chicago.
+ 1-p
+ #In fact, the opposite (Chicago > Los Angeles) is statistically significant surprisingly (1-p < 0.05).
+ 
  ################## end Massimo ################## 
 
 
