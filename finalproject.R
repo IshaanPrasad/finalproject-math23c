@@ -193,14 +193,45 @@ set.seed(123)
   } #takes about a minute
   mean(diffs) #should be close to zero
   hist(diffs, xlim=c(-6,13), breaks = "FD")
-  #Now display the observed difference on the histogram
+  #Display of the observed difference on the histogram
   abline(v = observed, col = "red")
   #What is the probability (the P value) that a difference this large
   #could have arisen with a random subset?
   pvalue <- 2*(sum(diffs >= observed)+1)/(N+1); pvalue #two sided test
   #Difference between Boston and Chicago is statistically significant (p-value is less than 0.05)! Boston has a 
   #statistically significant higher percentage of people using public transport compared to Chicago
-
+  
+  #Contingency Table & Chi-Squared
+  
+  Chicago <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+  ChicagoConditional <- (clean$County == "Cook" & clean$State == "Illinois")
+  Chicago <- Chicago[ChicagoConditional,]
+  
+  Boston <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+  BostonConditional <- (clean$County == "Suffolk" & clean$State == "Massachusetts")
+  Boston <- Boston[BostonConditional,]
+  Overall <- rbind(Chicago,Boston)
+  
+  #the greater than 25 percent use of public transportation is an arbitrary cutoff determined by the group
+  Overall$LotsOfTransit <- Overall$clean.Transit > 25
+  Overall$Chicago <- Overall$clean.County == "Cook"
+  
+  #This is the contingency table looking at if you are in Cook County (chicago) on if your public transportation 
+  # usage is greater than 25%
+  tbl <- table(Overall$Chicago, Overall$LotsOfTransit); tbl
+  
+  #Compare with the table that would be expected if the factors were independent
+  tbl
+  Expected <- outer(rowSums(tbl), colSums(tbl))/sum(tbl); Expected
+  #These table look quite different. It suggests that the difference in public transit usage could be statistically
+  # significant between Boston and Chicago. Is the difference significant?
+  
+  #Using a chi-squared test, we can determine the probability that this difference between the contingency table
+  # and the expected table occur by chance and use this p-value to determine if the difference is significant
+  chisq.test(Overall$Chicago,Overall$LotsOfTransit)
+  #The low p-value means there is about 1 chance in 10,000,000,000,000,000 that it arose by chance. Boston has a 
+  # statistically significant higher percent of population using of public transportation 
+  
 
 ## Machine Learning (OLS, Decision Tree, Random Forest)
   # Point 16 - Appropriate use of covariance or correlation.
@@ -222,7 +253,9 @@ set.seed(123)
   summary(rank_hat_ols)
   #Poverty, ChildPoverty, MeanCommute, Employed, Private Work, and Unemployment are all statistically significant 
   #correlates at the 5% level
-  ####### ABHISHEK MAKE A COMMENT HERE ABOUT CORRELATION ########
+  #With an R^2 value of 0.71, we can see that 71 percent of the change income is explained by the model
+  #Because this is a multivariable regression, the R value of 0.84 is less insightful as you don't know which variables
+  # exactly had which effect.
   
   #Decision Tree or Regression Tree
   one_tree <- rpart(reformulate(vars, "Income")
@@ -269,7 +302,8 @@ set.seed(123)
   mean(predictions$ols_error)^2
   mean(predictions$tree_error)^2
   mean(predictions$forest_error)^2
-  #random forest has the lowest out-of-sample MSE and is followed by the OLS Regression
+  #random forest has the lowest out-of-sample error and is followed by the OLS Regression
+  #There doesn't seem to be any indication of overfitting of the in-sample data.
   
   write.csv(predictions, "predictions.csv") #Save data as an excel .csv file
 
