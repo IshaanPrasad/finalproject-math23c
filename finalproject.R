@@ -112,31 +112,30 @@ abline(lm(income ~ percentA), col = "blue") # Asian
 abline(lm(income ~ percentP), col = "violet") # Pacific
 
 
-#Trying to do Permutation Test here 
-sum(clean$State == "Massachusetts"); sum(clean$State == "Alabama")
-#Not an equal amount so we will randomly sample 1172 counties from MA
 
-MaSample <- sample (clean$State == "Massachusetts", size=1172, replace =F)
-length(MaSample)
+#Permutation Test to see if differences between % of people using public transportation between MA & IL is significant
 #Calculate the observed beer consumption difference by State
-MassAvg <- sum(clean$Income*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MassAvg
-AlabAvg <- sum(clean$Income*(clean$State == "Alabama"))/sum(clean$State == "Alabama");AlabAvg
-observed <- MassAvg - AlabAvg; observed     #the men drank more beer
 
-#Now replace Massachusetts with a random sample of all the data
-State <- sample(clean$State); State   #permuted State column
-sum(State == "Massachusetts")  #still 15 men but they will match up with random beer consumption
-MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
-AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
-MassAvg - AlabAvg    #as likely to be negative or positive
+sum(clean$State == "Massachusetts")
+
+IlAvg <- sum(clean$Transit*(clean$State == "Illinois"))/sum(clean$State == "Illinois"); IlAvg
+MAAvg <- sum(clean$Transit*(clean$State == "Massachusetts"))/sum(clean$State == "Massachusetts"); MAAvg
+observed <- MAAvg - IlAvg; observed
+
+#Now replace all the states with a random sample of all the data
+State <- sample(clean$State); State   #permuted state column
+sum(State == "Massachusetts")  #still 1453 but each will match up with random transit percentage
+IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
+MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
+MAAvg - IlAvg   #as likely to be negative or positive
 #Repeat 10000 times
 N <- 10000
 diffs <- numeric(N)
 for (i in 1:N){
-  State <- sample(clean$State); State   #permuted State column
-  MassAvg <- sum(clean$Income*(State=="Massachusetts"))/sum(State=="Massachusetts"); MassAvg
-  AlabAvg <- sum(clean$Income*(State=="Alabama"))/sum(State=="Alabama"); AlabAvg
-  diffs[i] <- MassAvg - AlabAvg    #as likely to be negative or positive
+  State <- sample(clean$State); State  #permuted State column
+  IlAvg <- sum(clean$Transit*(State == "Illinois"))/sum(State == "Illinois"); IlAvg
+  MAAvg <- sum(clean$Transit*(State == "Massachusetts"))/sum(State == "Massachusetts"); MAAvg
+  diffs[i] <- MAAvg - IlAvg    #as likely to be negative or positive
 }
 mean(diffs) #should be close to zero
 hist(diffs, breaks = "FD")
@@ -144,48 +143,130 @@ hist(diffs, breaks = "FD")
 abline(v = observed, col = "red")
 #What is the probability (the P value) that a difference this large
 #could have arisen with a random subset?
-pvalue <- (sum(diffs >= observed)+1)/(N+1); pvalue
+pvalue <- 2*(1- (sum(diffs >= observed)+1)/(N+1)); pvalue #two sided significance test
+#Not statistically significant because P-Value is greater than 0.05
 
-# Trying to fit a beta distribution (ignore for now)
-#alpha <- ((1 - mu) / var - 1 / mu) * mu ^ 2
-#beta <- alpha * (1 / mu - 1)
-#dbeta(clean$Income, alpha, beta, ncp = 0, log = FALSE, add = TRUE)
+# Chiacgo vs. Boston for Transit through Permutation Test
+
+Chicago <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+ChicagoConditional <- (clean$County == "Cook" & clean$State == "Illinois")
+Chicago <- Chicago[ChicagoConditional,]
+Chicago <- Chicago[sample(nrow(Chicago), 191), ]
+
+Boston <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+BostonConditional <- (clean$County == "Suffolk" & clean$State == "Massachusetts")
+Boston <- Boston[BostonConditional,]
+Overall <- rbind(Chicago,Boston)
+
+ChicagoAvg <- sum(Overall$clean.Transit*(Overall$clean.County == "Cook"))/sum(Overall$clean.County == "Cook"); ChicagoAvg
+BostonAvg <- sum(Overall$clean.Transit*(Overall$clean.County == "Suffolk"))/sum(Overall$clean.County == "Suffolk"); BostonAvg
+observed <- BostonAvg - ChicagoAvg; observed
+
+#Now replace Massachusetts with a random sample of all the data
+County <- sample(Overall$clean.County); County   #permuted State column
+sum(County == "Cook")  #still 15 men but they will match up with random beer consumption
+ChicagoAvg <- sum(Overall$clean.Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
+BostonAvg <- sum(Overall$clean.Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
+BostonAvg - ChicagoAvg  #as likely to be negative or positive
+#Repeat 10000 times
+N <- 10000
+diffs <- numeric(N)
+for (i in 1:N){
+  Chicago <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+  ChicagoConditional <- (clean$County == "Cook" & clean$State == "Illinois")
+  Chicago <- Chicago[ChicagoConditional,]
+  Chicago <- Chicago[sample(nrow(Chicago), 191), ]
+  
+  Boston <- data.frame(clean$CensusTract, clean$County, clean$State, clean$Transit)
+  BostonConditional <- (clean$County == "Suffolk" & clean$State == "Massachusetts")
+  Boston <- Boston[BostonConditional,]
+  Overall <- rbind(Chicago,Boston)
+  
+  County <- sample(Overall$clean.County); County   #permuted State column
+  ChicagoAvg <- sum(Overall$clean.Transit*(County == "Cook"))/sum(County == "Cook"); ChicagoAvg
+  BostonAvg <- sum(Overall$clean.Transit*(County == "Suffolk"))/sum(County == "Suffolk"); BostonAvg
+  diffs[i] <- BostonAvg - ChicagoAvg    #as likely to be negative or positive
+}
+mean(diffs) #should be close to zero
+hist(diffs, xlim=c(-6,13), breaks = "FD")
+#Now display the observed difference on the histogram
+abline(v = observed, col = "red")
+#What is the probability (the P value) that a difference this large
+#could have arisen with a random subset?
+pvalue <- 2*(sum(diffs >= observed)+1)/(N+1); pvalue #two sided test
+#Difference between Boston and Chicago is statistically significant! Boston has a statistically significant higher
+#percentage of people using public transport compared to Chicago
+
 
 
 #Storing predictor variables
-#Order data in stata so all predictors appear in right-most columns
 vars <- colnames(clean[18:ncol(clean)])
 vars
 
-#OLS Regression
-to_hat <- with(clean[clean$Income>0,], lm(reformulate(vars, "Income")))
-summary(to_hat)
-rank_hat_ols = predict(to_hat, newdata=clean)
-summary(rank_hat_ols); hist(rank_hat_ols, xlab="Predicted Rates - OLS")
+#Randomly sampling 70% of the data for a training set and the other 30% is testing
+insample <- c(rep(T, 50908),rep(F,21819))
+clean2 <- data.frame(clean, insample); head(clean2)
+nrow(clean2)
+insample <- sample(clean2$insample) #permuting to randomize which data points are selected for in-sample vs out-of-sample
+clean2 <- data.frame(clean, insample); head(clean2)
 
-# 
-# 
-# #Decision Tree or Regression Tree
-# one_tree <- rpart(reformulate(vars, "Income")
-#                   , data=clean
-#                   , control = rpart.control(xval = 10)) ## this sets the number of folds for cross validation.
-# 
-# one_tree #Text Representation of Tree
-# rank_hat_tree <- predict(one_tree, newdata=clean)
-# table(rank_hat_tree)
-# hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
-# 
-# plot(one_tree) # plot tree
-# text(one_tree) # add labels to tree
-# # print complexity parameter table using cross validation
-# printcp(one_tree)
-# 
+#OLS Regression
+to_hat <- with(clean2[clean2$insample==1,], lm(reformulate(vars, "Income")))
+summary(to_hat)
+rank_hat_ols = predict(to_hat, newdata=clean2)
+summary(rank_hat_ols)
+#Poverty, ChildPoverty, MeanCommute, Employed, Private Work, and Unemployment are all statistically significant 
+#correlates at the 5% level
+
+#Decision Tree or Regression Tree
+one_tree <- rpart(reformulate(vars, "Income")
+                  , data=clean2
+                  , subset = clean2$insample==1
+                  , control = rpart.control(xval = 5)) ## this sets the number of folds for cross validation.
+
+one_tree #Text Representation of Tree
+#Decision tree shows that the best predictors 
+rank_hat_tree <- predict(one_tree, newdata=clean2)
+table(rank_hat_tree)
+hist(rank_hat_tree, xlab="Predicted Rates - Single Tree")
+
+plot(one_tree) # plot tree
+text(one_tree) # add labels to tree, download as PDF to see full version (looks cramped on screen)
+# print complexity parameter table using cross validation
+printcp(one_tree)
+
 # #Random Forest from 500 Bootstrapped Samples
- forest_hat <- randomForest(reformulate(vars, "Income"), ntree=100, mtry=20, maxnodes=50
-                            ,importance=TRUE, do.trace=25, data=clean[clean$Income>0,])
- getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
- rank_hat_forest <- predict(forest_hat, newdata=clean,type="response")
- summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
+forest_hat <- randomForest(reformulate(vars, "Income"), ntree=500, mtry=20, maxnodes=50
+                           ,importance=TRUE, do.trace=25, data=clean2[clean2$insample==1,])
+getTree(forest_hat, 100, labelVar = TRUE) #Text Representation of Tree
+rank_hat_forest <- predict(forest_hat, newdata=clean2,type="response")
+summary(rank_hat_forest); hist(rank_hat_forest, xlab="Predicted Rates - Random Forest")
+
+
+#Out-of-Sample Validation
+if (!require(stargazer)) install.packages("stargazer"); library(stargazer)
+
+#Merge training data with test data
+clean2$rank_hat_ols <- rank_hat_ols
+clean2$rank_hat_tree <- rank_hat_tree
+clean2$rank_hat_forest <- rank_hat_forest
+
+predictions <- clean2[clean2$insample==0,]
+predictions <- predictions[,-c(4:13)]
+predictions <- predictions[,-c(5:7)]
+predictions <- predictions[,-c(5:25)]
+
+predictions$ols_error <- predictions$Income - predictions$rank_hat_ols
+predictions$tree_error <- predictions$Income - predictions$rank_hat_tree
+predictions$forest_error <- predictions$Income - predictions$rank_hat_forest
+
+mean(predictions$ols_error)^2
+mean(predictions$tree_error)^2
+mean(predictions$forest_error)^2
+#random forest has the lowest out-of-sample MSE and is followed by the OLS Regression
+
+write.csv(predictions, "predictions.csv") #Save data as an excel .csv file
+
 
 
  ################## Massimo ################## 
