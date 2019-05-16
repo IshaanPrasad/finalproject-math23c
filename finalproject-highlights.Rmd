@@ -74,14 +74,14 @@ percentA <- clean$Asian / 100       # Asian
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Native People in Tract") +
     ylab("Average Income of Tract") +
-    ggtitle("Percent Natives vs. Average Income (in tract) ")
+    ggtitle("Percent Native Americans vs. Average Income (in tract) ")
   # Pacific
   ggplot(df, aes(percentP, income)) + 
     geom_point(color = "dodgerblue2", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Pacific People in Tract") +
     ylab("Average Income of Tract") +
-    ggtitle("Percent Pacifics vs. Average Income (in tract) ")
+    ggtitle("Percent Pacific Islanders vs. Average Income (in tract) ")
   # White
   ggplot(df, aes(percentW, income)) + 
     geom_point(color = "violet", size = 0.5) + 
@@ -91,7 +91,7 @@ percentA <- clean$Asian / 100       # Asian
     ggtitle("Percent Whites vs. Average Income (in tract) ")
 ```
 
-## Visualizng Trends through Bar Plots to Predict Incomem
+## Visualizng Trends through Bar Plots to Predict Income
 We began by plotting the average income for tracts.
 ```{r, echo=FALSE}
 # Setup variables (considering tracts that have >50% of one race)

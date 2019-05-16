@@ -1,6 +1,10 @@
 rm(list=ls())
 set.seed(123)
 
+################## YouTube Video ################## 
+# Point 23
+# Check out our YouTube video here: https://youtu.be/vn0ZCPDP1SQ
+
 ################## BEGIN Set Up ################## 
 ## Change this to location of your data
   setwd("/Users/ishaanprasad/math23c/finalproject-math23c")
@@ -388,7 +392,7 @@ set.seed(123)
     nativepoverty = mean(mostlynative); nativpoverty
     pacificpoverty = mean(mostlypacific); pacificpoverty
     # Visualize Mean Poverty by Race
-    barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty Rate by Predominant Racial Group in Tract", xlab = "Race", ylab = "Income ($)", col = rgb(0,0.7,0.3,0.4))
+    barplot(c(whitepoverty,blackpoverty,hispanicpoverty,asianpoverty,nativepoverty,pacificpoverty), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Poverty Rate by Predominant Racial Group in Tract", xlab = "Race", ylab = "Poverty Rate", col = rgb(0,0.7,0.3,0.4))
     
  
  
