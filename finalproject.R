@@ -51,7 +51,7 @@ set.seed(123)
   sigma <- sd(clean$Income)     #estimates square root of the population variance
   curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
   
-## Visualizng the percentage of a race in a population w.r.t. the average income of the population
+## Visualizng the percentage of a race in a population w.r.t. the median income of the population
   # Point 11 - Nicely labeled graphics using ggplot, with good use of color, line styles, etc., that tell a convincing story.
   # Point 14 - Use of linear regression
   # Setting up the relevant percentages for races
@@ -77,37 +77,43 @@ set.seed(123)
     geom_point(color = "red", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Asian People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Asians vs. Average Income (in tract) ")
   # Black
   ggplot(df, aes(percentB, income)) + 
-    geom_point(color = "red", size = 0.5) + 
+    geom_point(color = "orange", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Black People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Blacks vs. Average Income (in tract) ")
   # Hispanic
   ggplot(df, aes(percentH, income)) + 
-    geom_point(color = "red", size = 0.5) + 
+    geom_point(color = "yellow", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Hispanic People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Hispanics vs. Average Income (in tract) ")
   # Native
   ggplot(df, aes(percentN, income)) + 
-    geom_point(color = "red", size = 0.5) + 
+    geom_point(color = "green", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Native People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Natives vs. Average Income (in tract) ")
   # Pacific
   ggplot(df, aes(percentP, income)) + 
-    geom_point(color = "red", size = 0.5) + 
+    geom_point(color = "dodgerblue2", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of Pacific People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Pacifics vs. Average Income (in tract) ")
   # White
   ggplot(df, aes(percentW, income)) + 
-    geom_point(color = "red", size = 0.5) + 
+    geom_point(color = "violet", size = 0.5) + 
     geom_smooth(method = "lm", color ="blue") +
     xlab("Percent of White People in Tract") +
-    ylab("Average Income of Tract")
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Whites vs. Average Income (in tract) ")
   # Linear regression on the above data
   Percent <- c(0,1)
   Income <- c(0, 200000)
@@ -141,7 +147,7 @@ set.seed(123)
     diffs[i] <- MAAvg - IlAvg    #as likely to be negative or positive
   }
   mean(diffs) #should be close to zero
-  hist(diffs, breaks = "FD")
+  hist(diffs, breaks = "FD", col="light blue")
   #Now display the observed difference on the histogram
   abline(v = observed, col = "red")
   #What is the probability (the P value) that a difference this large
@@ -192,7 +198,7 @@ set.seed(123)
     diffs[i] <- BostonAvg - ChicagoAvg    #as likely to be negative or positive
   } #takes about a minute
   mean(diffs) #should be close to zero
-  hist(diffs, xlim=c(-6,13), breaks = "FD")
+  hist(diffs, xlim=c(-6,13), breaks = "FD", col="light green")
   #Display of the observed difference on the histogram
   abline(v = observed, col = "red")
   #What is the probability (the P value) that a difference this large
@@ -508,4 +514,4 @@ set.seed(123)
   
   kurtosis = sum(((drive - mu)^4)/(N*s^4))-3; kurtosis #kurtosis is 5.74
 
-##################   END Analysis   ################## 
+##################   END Analysis   ##################

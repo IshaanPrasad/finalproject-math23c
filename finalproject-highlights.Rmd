@@ -1,0 +1,95 @@
+---
+title: "ExploreCensus - MATH23C Final Project Highlights"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+
+```{r, echo=FALSE}
+
+  clean <- read.csv("clean.csv")
+## Histogram with Normal Distribution added
+  # Display Histogram
+  hist(clean$Income, breaks = "FD", probability = TRUE, col="light blue", xlab = "Income (USD)", main = "Histogram of Income Distribution")
+  # To find the best fitting normal distribution, compute the mean and variance of the data
+  mu <- mean(clean$Income)
+  var <- var(clean$Income)
+  sigma <- sd(clean$Income)     #estimates square root of the population variance
+  curve(dnorm(x, mu, sigma), from = 0, to = 250000, add = TRUE, col = "red")
+```
+
+## Visualizng the Percentage of a Race in a Tract compared the Average Income of the Tract
+We used scatterplots to visualize the percentage of a specific race in a tract with respect to the median income of the tract overall. In particular, we found that the slope for the Asian population was the most positive of all the scatterplots, reflecting broader trends amongst one of the fastest growing, highest-educated minority groups in the nation.
+
+```{r, echo=FALSE}
+clean <- read.csv("clean.csv")
+if (!require(ggplot2)) install.packages("ggplot2"); library(ggplot2)
+percentA <- clean$Asian / 100       # Asian
+  percentB <- clean$Black / 100       # Black
+  percentH <- clean$Hispanic / 100    # Hispanic
+  percentN <- clean$Native / 100      # Native
+  percentP <- clean$Pacific / 100     # Pacific
+  percentW <- clean$White / 100       # White
+  income <-  clean$Income
+# ggplotting the data: fulfilling "Nicely labeled graphics using ggplot, with good use of color, line styles, etc., that tell a convincing story"
+  df <- data.frame(
+    percentA,      # Asian
+    percentB,      # Black
+    percentH,   # Hispanic
+    percentN,    # Native
+    percentP,  # Pacific
+    percentW,       # White
+    income
+  )
+  # Asian
+  ggplot(df, aes(percentA, income)) + 
+    geom_point(color = "red", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of Asian People in Tract") +
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Asians vs. Average Income (in tract) ")
+  # Black
+  ggplot(df, aes(percentB, income)) + 
+    geom_point(color = "orange", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of Black People in Tract") +
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Blacks vs. Average Income (in tract) ")
+  # Hispanic
+  ggplot(df, aes(percentH, income)) + 
+    geom_point(color = "yellow", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of Hispanic People in Tract") +
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Hispanics vs. Average Income (in tract) ")
+  # Native
+  ggplot(df, aes(percentN, income)) + 
+    geom_point(color = "green", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of Native People in Tract") +
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Natives vs. Average Income (in tract) ")
+  # Pacific
+  ggplot(df, aes(percentP, income)) + 
+    geom_point(color = "dodgerblue2", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of Pacific People in Tract") +
+    ylab("Average Income of Tract") +
+    ggtitle("Percent Pacifics vs. Average Income (in tract) ")
+  # White
+  ggplot(df, aes(percentW, income)) + 
+    geom_point(color = "violet", size = 0.5) + 
+    geom_smooth(method = "lm", color ="blue") +
+    xlab("Percent of White People in Tract") +
+    ylab("Average Income of Tract") + 
+    ggtitle("Percent Whites vs. Average Income (in tract) ")
+```
+
+
