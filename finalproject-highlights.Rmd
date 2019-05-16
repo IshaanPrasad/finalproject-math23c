@@ -7,10 +7,9 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Introduction
+## Visualizing Median Household Incomes
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
+Upon cleaning up the dataset, we began our analysis by visualizing the median household incomes using a histogram. Overlaying the probability density graph for the normal distribution over the histogram, it became clear that median household incomes do not fall within this distribution.
 
 ```{r, echo=FALSE}
 
@@ -90,6 +89,101 @@ percentA <- clean$Asian / 100       # Asian
     xlab("Percent of White People in Tract") +
     ylab("Average Income of Tract") + 
     ggtitle("Percent Whites vs. Average Income (in tract) ")
+```
+
+## Visualizng Trends through Bar Plots to Predict Incomem
+We began by plotting the average income for tracts.
+```{r, echo=FALSE}
+# Setup variables (considering tracts that have >50% of one race)
+  income = clean$Income
+  hispanic = which(clean$Hispanic>50) 
+  white = which(clean$White>50)
+  black = which(clean$Black>50)
+  native = which(clean$Native>50)
+  asian = which(clean$Asian>50)
+  pacific = which(clean$Pacific>50)
+  
+  ## Income
+    #Setup income variables
+    mostlywhite = clean$Income[white]
+    mostlyblack = clean$Income[black]
+    mostlyhispanic = clean$Income[hispanic]
+    mostlyasian = clean$Income[asian]
+    mostlynative = clean$Income[native]
+    mostlypacific = clean$Income[pacific]
+    # Get mean incomes
+    whiteincome = mean(mostlywhite)
+    blackincome = mean(mostlyblack)
+    hispanicincome = mean(mostlyhispanic)
+    asianincome = mean(mostlyasian)
+    nativeincome = mean(mostlynative)
+    pacificincome = mean(mostlypacific)
+    # Visualize Mean Income by Race
+    barplot(c(whiteincome, blackincome, hispanicincome, asianincome, nativeincome, pacificincome), names.arg = c("white", "black", "hispanic", "asian", "native", "pacific"),main = "Income by Predominant Racial Group in Tract", xlab = "Race", ylab = "Income ($)", col = rgb(0,0.3,0.7,0.4))
+```
+
+Given that the tracts with predominantly Asian populations (i.e., >50%) had the highest mean income, we tested to see if the income of these tracts were significantly greater than the other tracts.
+
+
+```{r}
+    #Predominantly Asian tracts have the highest average income
+    #Is it significantly greater than each other race?
+    w = asianincome - whiteincome
+    b = asianincome - blackincome
+    h = asianincome - hispanicincome
+    n = asianincome - nativeincome
+    p = asianincome - pacificincome
+    
+    s.w = var(mostlywhite)/length(mostlywhite)
+    s.b = var(mostlyblack)/length(mostlyblack)
+    s.h = var(mostlyhispanic)/length(mostlyhispanic)
+    s.a = var(mostlyasian)/length(mostlyasian)
+    s.n = var(mostlynative)/length(mostlynative)
+    s.p = var(mostlypacific)/length(mostlypacific)
+    
+    t.w = w/sqrt(s.w+s.a)
+    t.b = b/sqrt(s.b+s.a)
+    t.h = h/sqrt(s.h+s.a)
+    t.n = n/sqrt(s.n+s.a)
+    t.p = p/sqrt(s.p+s.a)
+    
+    p.w = 1 - pnorm(t.w, 0, 1)
+    p.b = 1 - pnorm(t.b, 0, 1)
+    p.h = 1 - pnorm(t.h, 0, 1)
+    p.n = 1 - pnorm(t.n, 0, 1)
+    p.p = 1 - pnorm(t.p, 0, 1)
+    
+    p.w; p.b; p.h; p.n; p.p  #All of the differences are significant
+```
+
+Ultimately, we found that the differences were clearly statisically significant in all cases.
+
+We also used the percentage of people working in a “professional” industry (management, business, science, and arts) could be used as a predictor of being “wealthy” (median income over $50,000) in Massachusetts using a logistic regression curve. The curve demonstrated a pretty strong positive correlation, and the model gave fairly accurate predictions of the data
+```{r, echo=FALSE}
+if (!require(stats4)) install.packages("stats4"); library(stats4)
+income = clean$Income
+  mass = which(clean$State == "Massachusetts") #look at just tracts in Massachusetts
+  professional = clean$Professional[mass] #independent variable is the percentage of workers employed in management, business, science, and arts
+  hist(professional, breaks = "fd", main = "Distribution of Percentage of Professional Workers in Tract", xlab = "Percent Professional Workers", col = rgb(.4,.6,0,.5))
+  
+  
+  wealthy <- (as.numeric(income[mass]>=50000)); head(wealthy) #threshold for being a "wealthy" county is average income above $50,000
+  plot(professional,wealthy,xlab = "Percent Professional Workers", ylab = "Wealthy", main = "Wealthy by Percent Professional")  
+  
+  MLL<- function(alpha, beta) {
+   -sum( log( exp(alpha+beta*professional)/(1+exp(alpha+beta*professional)) )*wealthy
+         + log(1/(1+exp(alpha+beta*professional)))*(1-wealthy) )
+  }
+  results<-mle(MLL, start = list(alpha = 0, beta = 0)) #an initial guess is required
+  results@coef
+  curve( exp(results@coef[1]+results@coef[2]*x)/ (1+exp(results@coef[1]+results@coef[2]*x)),col = "blue", add=TRUE)
+  abline(v=20, col = "red"); abline(v=40, col = "green")
+  index <- which(professional >= 19 & professional <= 21); head(index)   #evaluated in a small range of values around 20, because very few tracts were exactly equal to 20 and might not give an accurate estimate
+  a = mean(wealthy[index]); a   #21% wealthy tracts 
+  abline(h=a, col = "red")  #not bad
+  index <- which(professional >= 39 & professional <= 41); head(index)   #evaluated in a small range of values around 40, because very few tracts were exactly equal to 40 and might not give an accurate estimate
+  b = mean(wealthy[index]); b   #87% wealthy tracts
+  abline(h=b, col = "green")  #pretty good
 ```
 
 

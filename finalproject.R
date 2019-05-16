@@ -430,7 +430,7 @@ set.seed(123)
   #What percentage of the time does the interval contain the population mean?
   counter/100  #around 95% most of the time
   
-  ### Logistic Regression ###
+## Logistic Regression
   #Point 15 - Calculation and display of a logistic regression curve.
   income = clean$Income
   mass = which(clean$State == "Massachusetts") #look at just tracts in Massachusetts
